@@ -17,7 +17,8 @@ export function ContentProvider({children}){
     const [log,setLog]= useState(null)
     const [answerInputValue,setAnswerInputValue] =useState([])
     const [x402Response,setX402Response] =useState(null)
-    const [tipInputValue,setTipInputValue] =useState([])
+    const [tipInputValue,setTipInputValue] =useState([])    
+    const [descri,setDscri] = useState([])
     const valueToShare ={
         isGuess:isGuess,
         setIsGuess:setIsGuess,
@@ -45,6 +46,8 @@ export function ContentProvider({children}){
         setX402Response:setX402Response,
         tipInputValue:tipInputValue,
         setTipInputValue:setTipInputValue,
+        descri:descri,
+        setDscri:setDscri,
 
     }
     return (

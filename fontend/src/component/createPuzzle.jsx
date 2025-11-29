@@ -5,7 +5,7 @@ import { FileUpload } from 'primereact/fileupload';
 
 export function CreateGuess(){
 
-    const {isCreate,setIsCreate,CreateInputValue,setCreateInputValue,enterFee,setEnterFee,hardInputValue,nameInputValue,setHardInputValue,setNameInputValue,answerInputValue,setAnswerInputValue} = useContent()
+    const {isCreate,setIsCreate,CreateInputValue,setCreateInputValue,enterFee,setEnterFee,hardInputValue,nameInputValue,setHardInputValue,setNameInputValue,answerInputValue,setAnswerInputValue,setDscri,descri} = useContent()
     function onUpload(){
       console.log("上传成功！")
     }
@@ -33,6 +33,8 @@ export function CreateGuess(){
          <input type="text" Value={answerInputValue}  onchange={(e)=>{setAnswerInputValue(e.target.value)}} className="placeholder-box2"/>
          <p className='tip'>tip</p>
          <input type="text" Value={answerInputValue}  onchange={(e)=>{setAnswerInputValue(e.target.value)}} className="placeholder-box2"/>
+         
+         
         </div>
         {/* Controls Row */}
         <div className="controls-row">

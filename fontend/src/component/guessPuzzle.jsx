@@ -1,11 +1,23 @@
 import React from 'react';
 import './guessPuzzle.css';
 import { useContent } from '../hooks/context';
-import { useX402Request } from '../hooks/join';
 
+// join函数
 
-export function GuessPuzzle({content="xxxxxxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxxxxx"],description="xxxxxxxxxx"}){
-    const {isGuess,setIsGuess,guessInputValue,setGuessInputValue,userAddress,guessValue,setGuessValue} = useContent()
+//import {useWriteContract} from "wagmi"
+//import {contractX} from "../hooks/contracts"
+//const {writeContract} =useWriteContract
+/*onClick={()=>{writeContract({
+      address:contractX.address, 
+      abi:contractX.abi,
+      args:[userAddress,reciveAddress,"0.1"]
+})}}
+*/
+
+/* 缺失一个函数，返回content，tip  */
+
+export function GuessPuzzle({content="xxxxxxxxxxxxxx",description="xxxxxxxxxx"}){
+    const {isGuess,setIsGuess,guessInputValue,setGuessInputValue,userAddress,} = useContent()
   return (
     isGuess?
     <div className="modal-overlay">
@@ -40,9 +52,7 @@ export function GuessPuzzle({content="xxxxxxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxx
             
             <div className="tips-box">
               <span className="tips-label">tips:</span>
-              {tips.map((item,index)=>{
-                return <p>{index+1}.{item}</p>
-              })}
+              
             </div>
           </div>
         </div>
