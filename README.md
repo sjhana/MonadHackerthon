@@ -110,8 +110,8 @@ npm install
 # 编译合约
 npx hardhat compile
 
-# 部署到测试网 (例如 Sepolia)
-npx hardhat run scripts/deploy.js --network sepolia
+# 部署到测试网 (例如 monad testnet)
+npx hardhat run scripts/deploy.js --network monad testnet
 ```
 
 *部署后，请将生成的合约地址更新到前端的 `.env` 文件中。*
