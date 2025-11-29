@@ -1,12 +1,11 @@
 import React from 'react';
 import './guessPuzzle.css';
 import { useContent } from '../hooks/context';
-import { useWriteContract } from 'wagmi';
+import { useX402Request } from '../hooks/join';
 
 
-export function GuessPuzzle({content="xxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxxxxx"]},moreTip,join,){
-    const {isGuess,setIsGuess,inputValue,setInputValue,userAddress} = useContent()
-    const {wirteContract} = useWriteContract()
+export function GuessPuzzle({content="xxxxxxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxxxxx"],description="xxxxxxxxxx"}){
+    const {isGuess,setIsGuess,guessInputValue,setGuessInputValue,userAddress,guessValue,setGuessValue} = useContent()
   return (
     isGuess?
     <div className="modal-overlay">
@@ -19,27 +18,28 @@ export function GuessPuzzle({content="xxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxxxxx"
         </div>
 
         {/* 2. Main Center Display Box */}
-        <div className="display-box">
-          <span className="placeholder-text">{content}</span>
+        <div >
+          <p className="display-box">{content}</p>
         </div>
 
         {/* 3. Middle Section: Buttons & Tips */}
         <div className="middle-section">
           {/* Left Side: Buttons and Fees */}
           <div className="left-controls">
-            <button className="action-btn" onClick={join}>join in</button>
-            <button className="action-btn" onClick={moreTip}>more tip</button>
+            <button className="action-btn" onClick={()=>{
+            }}>join in</button>
             
             <div className="fee-info">
-              <div>join in fee:0.5mon</div>
-              <div>tip fee:0.1mon</div>
+              <div>joinFee:0.5mon</div>
+              <div className='descri'>description:{description}</div>
             </div>
           </div>
 
           {/* Right Side: Tips Box */}
           <div className="right-tips">
-            <span className="tips-label">tips:</span>
+            
             <div className="tips-box">
+              <span className="tips-label">tips:</span>
               {tips.map((item,index)=>{
                 return <p>{index+1}.{item}</p>
               })}
@@ -53,11 +53,11 @@ export function GuessPuzzle({content="xxxxxxxxxx",tips=["xxxxxxxxxxx","xxxxxxxx"
             type="text" 
             className="answer-input" 
             placeholder="your answer"
-            value={inputValue}
-            onChange={(e)=>setInputValue(e.target.value)} 
+            value={guessInputValue}
+            onChange={(e)=>setGuessInputValue(e.target.value)} 
           />
           <button className="confirm-btn" onClick={()=>{
-            Hash(inputValue+userAddress)
+            Hash(guessInputValue+userAddress)
             log?console.log(log):console.log(lodding)
           }}>comfirm</button>
         </div>
