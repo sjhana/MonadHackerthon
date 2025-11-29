@@ -54,7 +54,7 @@ web3-treasure-hunt/
 
 CryptoHunter 是一个建立在链上的互动解谜游戏平台。
 
-  * **对于创作者**：利用 **AI (GPT-4 & DALL-E)** 零门槛生成复杂的谜面故事和藏宝图，设置奖金（ETH/Token）和**入场费（Entry Fee）**。
+  * **对于创作者**：利用 **AI (GPT-4 & DALL-E)** 零门槛生成复杂的谜面故事和藏宝图，设置奖金（MON/Token）和**入场费（Entry Fee）**。
   * **对于玩家**：支付少量费用（通过 **x402 协议**）解锁谜题内容，利用智慧解开谜题，赢得奖金池。
   * **对于生态**：完全去中心化的 **Winner-Takes-All** 模式，结合 **Commit-Reveal** 机制彻底解决链上解谜游戏常见的“抢跑（Front-running）”问题。
 
