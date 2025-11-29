@@ -1,11 +1,11 @@
-import './createPuzzle.css';
+import './create.css';
 import { useContent } from '../hooks/context';
 import { FileUpload } from 'primereact/fileupload';
 //上传图片的api还没有写    create按钮的上传函数没写
 
 export function CreateGuess(){
 
-    const {isCreate,setIsCreate,CreateInputValue,setCreateInputValue,enterFee,setEnterFee,hardInputValue,nameInputValue,setHardInputValue,setNameInputValue,answerInputValue,setAnswerInputValue,setDscri,descri} = useContent()
+    const {isCreate,setIsCreate,CreateInputValue,setCreateInputValue,enterFee,setEnterFee,nameInputValue,setNameInputValue,answerInputValue,setAnswerInputValue,tipInputValue,setTipInputValue,setDscri,descri} = useContent()
     function onUpload(){
       console.log("上传成功！")
     }
@@ -32,7 +32,10 @@ export function CreateGuess(){
          <p className='answer'>answer</p>
          <input type="text" Value={answerInputValue}  onchange={(e)=>{setAnswerInputValue(e.target.value)}} className="placeholder-box2"/>
          <p className='tip'>tip</p>
-         <input type="text" Value={answerInputValue}  onchange={(e)=>{setAnswerInputValue(e.target.value)}} className="placeholder-box2"/>
+         <input type="text" Value={tipInputValue}  onchange={(e)=>{setTipInputValue(e.target.value)}} className="placeholder-box3"/>
+         <p className='des'>description</p>
+         <input type="text" Value={descri}  onchange={(e)=>{setDscri(e.target.value)}} className="placeholder-box4"/>
+
          
          
         </div>
@@ -49,10 +52,7 @@ export function CreateGuess(){
             <div>
               <label>puzzle-Name:<input type="text" Value={nameInputValue} onChange={(e)=>{setNameInputValue(e.target.value)}} className="prize-input" /></label>
             </div>
-            <div>
-              <label>hard-level:<input type="text" Value={hardInputValue} onChange={(e)=>{setHardInputValue(e.target.value)}} className="prize-input" /></label>
-            </div>      
-            <div><label>level:easy,middle,hard</label></div>              
+          
         </div>
         
         
