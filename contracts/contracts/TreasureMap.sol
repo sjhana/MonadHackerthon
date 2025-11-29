@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "./interfaces/IX402.sol";
-
 /**
  * @title TreasureMap
  * @dev 核心业务合约 - 创建、解锁、解密藏宝图
@@ -12,6 +10,7 @@ contract TreasureMap {
     // ============ 状态变量 ============
     
     struct Map {
+        string name;             // Map_name
         address creator;
         string metadataURI;      // IPFS URI 存储谜题内容
         bytes32 answerHash;      // 正确答案的哈希
@@ -23,21 +22,24 @@ contract TreasureMap {
 
     struct Commit {
         bytes32 commitHash;
-        uint256 blockNumber;
-        bool revealed;
     }
 
     uint256 public mapCount;
-    mapping(uint256 => Map) public maps;
-    mapping(uint256 => mapping(address => Commit)) public commits;
-    mapping(uint256 => mapping(address => bool)) public hasUnlocked;
+    mapping(uint256 => Map) public maps;                                // map_id -> map
+    mapping(uint256 => mapping(address => Commit)) public commits;      // map_id -> (player -> commit)
+    mapping(uint256 => mapping(address => bool)) public hasUnlocked;    // map_id -> (player -> hasUnlocked)
 
     // ============ 事件 ============
     
+    // map创建事件
     event MapCreated(uint256 indexed mapId, address indexed creator, uint256 prizePool, uint256 entryFee);
+    // 解锁map事件
     event MapUnlocked(uint256 indexed mapId, address indexed player);
+    // 答案提交事件
     event AnswerCommitted(uint256 indexed mapId, address indexed player, bytes32 commitHash);
-    event AnswerRevealed(uint256 indexed mapId, address indexed player, bool correct);
+    // 错误答案声明
+    event AnswerIsWrong(uint256 indexed mapId, address indexed player);
+    // 产生赢家事件
     event PrizeClaimed(uint256 indexed mapId, address indexed winner, uint256 amount);
 
     // ============ 修饰器 ============
@@ -63,17 +65,19 @@ contract TreasureMap {
     function createMap(
         string calldata metadataURI,
         bytes32 answerHash,
-        uint256 entryFee
+        uint256 entryFee,
+        string calldata mapName
     ) external payable returns (uint256) {
         require(msg.value > 0, "TreasureMap: prize pool required");
         require(answerHash != bytes32(0), "TreasureMap: invalid answer hash");
 
         uint256 mapId = mapCount++;
         maps[mapId] = Map({
+            name: mapName,
             creator: msg.sender,
             metadataURI: metadataURI,
             answerHash: answerHash,
-            prizePool: msg.value,
+            prizePool: msg.value, // 将value存入合约
             entryFee: entryFee,
             solved: false,
             winner: address(0)
@@ -87,6 +91,7 @@ contract TreasureMap {
      * @dev 支付入场费解锁谜题 (x402 协议集成)
      * @param mapId 藏宝图 ID
      */
+    // 狗都不用x402协议！！！
     function unlockMap(uint256 mapId) external payable mapExists(mapId) notSolved(mapId) {
         Map storage map = maps[mapId];
         require(msg.value >= map.entryFee, "TreasureMap: insufficient entry fee");
@@ -106,47 +111,19 @@ contract TreasureMap {
      * @dev Phase 1: 提交答案哈希 (Commit)
      * @param mapId 藏宝图 ID
      * @param commitHash Hash(答案 + 盐 + 地址)
+     * @param salt Hash 的盐值
      */
-    function commitAnswer(uint256 mapId, bytes32 commitHash) external mapExists(mapId) notSolved(mapId) {
+    function commitAnswer_and_CheckAnswer(uint256 mapId, bytes32 commitHash, bytes32 salt) external mapExists(mapId) notSolved(mapId) {
         require(hasUnlocked[mapId][msg.sender], "TreasureMap: must unlock first");
         require(commits[mapId][msg.sender].commitHash == bytes32(0), "TreasureMap: already committed");
 
         commits[mapId][msg.sender] = Commit({
-            commitHash: commitHash,
-            blockNumber: block.number,
-            revealed: false
+            commitHash: commitHash
         });
 
         emit AnswerCommitted(mapId, msg.sender, commitHash);
-    }
 
-    /**
-     * @dev Phase 2: 揭示答案 (Reveal)
-     * @param mapId 藏宝图 ID
-     * @param answer 明文答案
-     * @param salt 随机盐值
-     */
-    function revealAnswer(uint256 mapId, string calldata answer, bytes32 salt) 
-        external 
-        mapExists(mapId) 
-        notSolved(mapId) 
-    {
-        Commit storage commit = commits[mapId][msg.sender];
-        require(commit.commitHash != bytes32(0), "TreasureMap: no commit found");
-        require(!commit.revealed, "TreasureMap: already revealed");
-        require(block.number > commit.blockNumber, "TreasureMap: wait at least 1 block");
-
-        // 验证 commit hash
-        bytes32 expectedHash = keccak256(abi.encodePacked(answer, salt, msg.sender));
-        require(commit.commitHash == expectedHash, "TreasureMap: invalid reveal");
-
-        commit.revealed = true;
-
-        // 验证答案是否正确
-        bytes32 answerHash = keccak256(abi.encodePacked(answer));
-        bool correct = (answerHash == maps[mapId].answerHash);
-
-        if (correct) {
+        if (commitHash == keccak256(abi.encodePacked(maps[mapId].answerHash, salt, msg.sender))) {
             maps[mapId].solved = true;
             maps[mapId].winner = msg.sender;
             
@@ -155,9 +132,11 @@ contract TreasureMap {
             payable(msg.sender).transfer(prize);
             
             emit PrizeClaimed(mapId, msg.sender, prize);
-        }
 
-        emit AnswerRevealed(mapId, msg.sender, correct);
+        } else {
+            commits[mapId][msg.sender].commitHash = bytes32(0);
+            emit AnswerIsWrong(mapId, msg.sender);
+        }
     }
 
     // ============ 查询函数 ============
@@ -167,6 +146,7 @@ contract TreasureMap {
      */
     function getMap(uint256 mapId) external view mapExists(mapId) returns (
         address creator,
+        string memory name,
         string memory metadataURI,
         uint256 prizePool,
         uint256 entryFee,
@@ -176,6 +156,7 @@ contract TreasureMap {
         Map storage map = maps[mapId];
         return (
             map.creator,
+            map.name,
             map.metadataURI,
             map.prizePool,
             map.entryFee,
@@ -194,11 +175,22 @@ contract TreasureMap {
     /**
      * @dev 生成 Commit Hash 的辅助函数（用于前端）
      */
-    function generateCommitHash(string calldata answer, bytes32 salt, address user) 
+    function generateCommitHash(bytes32 answerHash, bytes32 salt, address user) 
         external 
         pure 
         returns (bytes32) 
     {
-        return keccak256(abi.encodePacked(answer, salt, user));
+        return keccak256(abi.encodePacked(answerHash, salt, user));
+    }
+
+    /**
+     * @dev 生成 Answer Hash 的辅助函数（用于前端）
+     */
+    function generateAnswerHash(string calldata answer) 
+        external 
+        pure 
+        returns (bytes32) 
+    {
+        return keccak256(abi.encodePacked(answer));
     }
 }

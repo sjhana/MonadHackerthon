@@ -1,10 +1,12 @@
 require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
+
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.28",
+    version: "0.8.28", // 这里的版本号要和你合约里的 pragma solidity ^0.8.20 匹配
     settings: {
       optimizer: {
         enabled: true,
@@ -12,33 +14,14 @@ module.exports = {
       },
     },
   },
+  // 如果你需要部署到测试网，后续在这里添加 networks 配置
   networks: {
     hardhat: {
-      chainId: 31337,
     },
-    localhost: {
-      url: "http://127.0.0.1:8545",
+    monad_testnet: {
+      url: process.env.RPC_URL, // 链的节点地址
+      accounts: [PRIVATE_KEY], // 部署用的钱包私钥
+      chainId: 10143, // (可选) 填写该链的 Chain ID，防发错链，不填也能跑
     },
-    // Monad Testnet
-    monadTestnet: {
-      url: process.env.MONAD_TESTNET_RPC_URL || "https://testnet-rpc.monad.xyz",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 10143,
-    },
-    // Sepolia Testnet
-    sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 11155111,
-    },
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || "",
-  },
-  paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts",
   },
 };
